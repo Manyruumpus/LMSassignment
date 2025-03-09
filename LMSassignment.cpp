@@ -48,7 +48,7 @@ int daysBetween(const string &startDate, const string &endDate) {
 
 int dateDifference(int year1, int month1, int day1, int year2, int month2, int day2) {
     // Create time structures
-    tm date1 = {0}, date2 = {0};
+    tm date1 = {}, date2 = {};
 
     // Set date1 values
     date1.tm_year = year1 - 1900; // Years since 1900
@@ -75,7 +75,7 @@ class user {
         usertype user_type;
         string userid;
     
-        virtual void show_option(string userid,usertype user_type) {  // ✅ Virtual function
+        virtual void show_option(string userid,usertype user_type) {  
             cout << "Default User Options" << endl;
         }
     };
@@ -85,7 +85,7 @@ class user {
                 if (!fin) {
                     cout << "Error: Unable to open users.csv" << endl;
                     system("pause");
-                    return NULL;
+                    return 0;
                 }
                 
                 string line;
@@ -286,7 +286,6 @@ class user {
         }
         finBooks.close();
         
-        bool found = false;
         for (size_t i = 0; i < bookLines.size(); i++) {
             stringstream bs(bookLines[i]);
             string title, author, publisher, yearStr, ISBNStr, statusStr;
@@ -298,7 +297,6 @@ class user {
             getline(bs, statusStr, ',');
             
             if (ISBNStr == bookISBN) {
-                found = true;
                 // If the book is reserved, create a borrowing entry and update status
                 if (statusStr == "Reserved") {
                     string current_date = currentDate();
@@ -460,7 +458,7 @@ class user {
                         vector<string> fileLines;
                         string line;
                         bool found = false;
-                        bool available = false;
+
                         int targetLineIndex = -1;
                         while (getline(fin, line)) {
                             fileLines.push_back(line);
@@ -482,7 +480,7 @@ class user {
                                 found = true;
                                 targetLineIndex = i;
                                 if (statusStr == "Available") {
-                                    available = true;
+
                                 } else if (statusStr == "Unavailable") {
                                     string reserve;
                                     cout << "Sorry, the book is currently UNAVAILABLE.\n"
@@ -616,7 +614,6 @@ class user {
                         cout << "Enter the ISBN of the book you are returning: ";
                         cin >> bookISBN;
                         
-                        // === Step 1: Update borrowedbook.csv ===
                         vector<string> records;
                         ifstream fin("C:\\Users\\mohit\\OneDrive\\Desktop\\LMS\\borrowedbook.csv");
                         if (!fin) {
@@ -690,7 +687,6 @@ class user {
                         }
                         fout.close();
                         
-                        // === Step 2: Update the book's status in books.csv to "Available" ===
                         vector<string> bookLines;
                         ifstream finBooks("C:\\Users\\mohit\\OneDrive\\Desktop\\LMS\\books.csv");
                         if (!finBooks) {
@@ -973,7 +969,6 @@ class user {
                         vector<string> fileLines;
                         string line;
                         bool found = false;
-                        bool available = false;
                         int targetLineIndex = -1;
                         while (getline(fin, line)) {
                             fileLines.push_back(line);
@@ -995,7 +990,7 @@ class user {
                                 found = true;
                                 targetLineIndex = i;
                                 if (statusStr == "Available") {
-                                    available = true;
+                                    // available = true;
                                 } else if (statusStr == "Unavailable") {
                                     string reserve;
                                     cout << "Sorry, the book is currently UNAVAILABLE.\n"
@@ -1539,8 +1534,6 @@ class book{
     public:
     book() : title(""), author(""), publisher(""),year(2000),st(Available) {}
 
-    book(string t, string a, string p, int y,status s)
-    : title(t), author(a), year(y),publisher(p),st(s) {}
 };
 
 class Account {
