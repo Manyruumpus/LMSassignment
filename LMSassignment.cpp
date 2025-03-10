@@ -12,12 +12,16 @@
 #include <cstdio>   
 #include <cmath>  
 using namespace std;
-enum usertype {
-    Student, Faculty, Librarian
-};
-enum status {
-    Available, Reserved, unavailable
-};
+enum usertype {Student, Faculty, Librarian};
+enum status {Available, Reserved, unavailable};
+
+// address of the different files which are the code is going to be accessed
+// for the file which have all the list of books
+const string books= "C:\\Users\\mohit\\OneDrive\\Desktop\\LMS\\books.csv";
+// for the file which will record all the trasaction of the books
+const string borrowedbook = "C:\\Users\\mohit\\OneDrive\\Desktop\\LMS\\borrowedbook.csv";
+// file with all the details of registered member
+const string users= "C:\\Users\\mohit\\OneDrive\\Desktop\\LMS\\users.csv";
 
 int daysBetween(const string &startDate, const string &endDate) {
     tm tm_start = {};
@@ -81,7 +85,7 @@ class user {
     };
 
     int see_user_fine(const string userid){
-        ifstream fin("C:\\Users\\mohit\\OneDrive\\Desktop\\LMS\\users.csv");
+        ifstream fin(users);
                 if (!fin) {
                     cout << "Error: Unable to open users.csv" << endl;
                     system("pause");
@@ -119,7 +123,7 @@ class user {
     
     void see_borrowed_book(const string userid){
             string line;
-            ifstream fin("C:\\Users\\mohit\\OneDrive\\Desktop\\LMS\\borrowedbook.csv");
+            ifstream fin(borrowedbook);
                 if (!fin) {
                     cout << "Error: Unable to open borrowedbook.csv" << endl;
                     system("pause");
@@ -190,7 +194,7 @@ class user {
     
     void updateUserFine(const string &userid, int additionalFine) {
         vector<string> lines;
-        ifstream fin("C:\\Users\\mohit\\OneDrive\\Desktop\\LMS\\users.csv");
+        ifstream fin(users);
         if (!fin) {
             cout << "Error: Unable to open users.csv" << endl;
             return;
@@ -222,7 +226,7 @@ class user {
                  break;
              }
         }
-        ofstream fout("C:\\Users\\mohit\\OneDrive\\Desktop\\LMS\\users.csv");
+        ofstream fout(users);
         if (!fout) {
              cout << "Error: Unable to write to users.csv" << endl;
              return;
@@ -236,7 +240,7 @@ class user {
     bool findoverdue(const string &userid) {
         string current_date = currentDate();
         
-        ifstream fin("C:\\Users\\mohit\\OneDrive\\Desktop\\LMS\\borrowedbook.csv");
+        ifstream fin(borrowedbook);
         if (!fin) {
             cout << "Error: Unable to open borrowedbook.csv" << endl;
             return false;
@@ -275,7 +279,7 @@ class user {
         
     void availabiltychange(const string &userid, const string &bookISBN) {
         vector<string> bookLines;
-        ifstream finBooks("C:\\Users\\mohit\\OneDrive\\Desktop\\LMS\\books.csv");
+        ifstream finBooks(books);
         if (!finBooks) {
             cout << "Error: Unable to open books.csv" << endl;
             return;
@@ -303,7 +307,7 @@ class user {
                     string due_date = addDays(current_date, 15);
                     
                     // Append a new borrowing record in borrowedbook.csv.
-                    ofstream foutBorrowed("C:\\Users\\mohit\\OneDrive\\Desktop\\LMS\\borrowedbook.csv", ios::app);
+                    ofstream foutBorrowed(borrowedbook, ios::app);
                     if (!foutBorrowed) {
                         cout << "Error: Unable to open borrowedbook.csv" << endl;
                         return;
@@ -330,7 +334,7 @@ class user {
         }
         
         // Write the updated book records back to books.csv.
-        ofstream foutBooks("C:\\Users\\mohit\\OneDrive\\Desktop\\LMS\\books.csv");
+        ofstream foutBooks(books);
         if (!foutBooks) {
             cout << "Error: Unable to write to books.csv" << endl;
             return;
@@ -384,6 +388,7 @@ class user {
                         }
 
                     }
+                    
                     void borrowBook(string userid) {
                         system("cls");
                         // Check if user has outstanding fines.
@@ -411,7 +416,7 @@ class user {
                         }
                         // Check active borrowed count from borrowedbook.csv.
                         int activeBorrows = 0;
-                        ifstream finBorrowed("C:\\Users\\mohit\\OneDrive\\Desktop\\LMS\\borrowedbook.csv");
+                        ifstream finBorrowed(borrowedbook);
                         if (finBorrowed) {
                             string line;
                             while (getline(finBorrowed, line)) {
@@ -444,7 +449,7 @@ class user {
                         cout << "Enter the ISBN of the book you want to borrow: ";
                         cin >> bookISBN;
         // Check if book is available.
-                        ifstream fin("C:\\Users\\mohit\\OneDrive\\Desktop\\LMS\\books.csv");
+                        ifstream fin(books);
                         if (!fin) {
                             cout << "Error: Unable to open books.csv" << endl;
                              
@@ -479,28 +484,29 @@ class user {
                             if (ISBNStr == bookISBN) {
                                 found = true;
                                 targetLineIndex = i;
-                                if (statusStr == "Available") {
-
-                                } else if (statusStr == "Unavailable") {
+                                if (statusStr == "Available") {}
+                                else if (statusStr == "Unavailable") {
                                     string reserve;
                                     cout << "Sorry, the book is currently UNAVAILABLE.\n"
-                                        << "But you can reserve it. Do you want to reserve the book? (Yes/No): ";
+                                         << "But you can reserve it. Do you want to reserve the book? (Yes/No): ";
                                     cin >> reserve;
-                                    //update 
+                                    
                                     if (reserve == "YES" || reserve == "yes" || reserve == "Yes") {
+                                        // Update the book's status to "Reserved" in books.csv.
                                         string updatedLine = title + "," + author + "," + publisher + "," +
-                                                            yearStr + "," + ISBNStr + ",Reserved";
+                                                             yearStr + "," + ISBNStr + ",Reserved";
                                         fileLines[i] = updatedLine;
-                                        ofstream fout("C:\\Users\\mohit\\OneDrive\\Desktop\\LMS\\books.csv");
+                                        
+                                        ofstream fout(books);
                                         if (!fout) {
                                             cout << "Error: Unable to write to books.csv" << endl;
-                                             
                                             string check;
-                            cout << "Do you want to back to menu option:(Yes/No)";
-                            cin >> check;
-                            if (check == "Yes" || check == "yes" || check == "YES") show_option(userid,user_type);
-                            else exit();
-                            return;
+                                            cout << "Do you want to go back to the menu option (Yes/No): ";
+                                            cin >> check;
+                                            if (check == "YES" || check == "yes" || check == "Yes")
+                                                show_option(userid, user_type);
+                                            else 
+                                                exit();
                                             return;
                                         }
                                         for (const auto &l : fileLines) {
@@ -508,26 +514,45 @@ class user {
                                         }
                                         fout.close();
                                         cout << "Book reserved successfully!" << endl;
-                                         
+                                        
+                                        // Append a new record in borrowedbooks.csv with the desired format:
+                                        // userid,ISBN,current_date,2525-01-01,,0
+                                        string current_date = currentDate();
+                                        ostringstream oss;
+                                        oss << userid << "," << bookISBN << "," << current_date << ",2525-01-01,," << 0;
+                                        string borrowedLine = oss.str();
+                                        
+                                        ofstream borrowedOut(borrowedbook, ios::app);
+                                        if (!borrowedOut) {
+                                            cout << "Error: Unable to open borrowedbooks.csv" << endl;
+                                        } else {
+                                            borrowedOut << borrowedLine << "\n";
+                                            borrowedOut.close();
+                                            cout << "Borrowed book record added with due date 2525-01-01." << endl;
+                                        }
+                                        
                                         string check;
-                            cout << "Do you want to back to menu option:(Yes/No)";
-                            cin >> check;
-                            if (check == "Yes" || check == "yes" || check == "YES") show_option(userid,user_type);
-                            else exit();
-                            return;
+                                        cout << "Do you want to go back to the menu option (Yes/No): ";
+                                        cin >> check;
+                                        if (check == "YES" || check == "yes" || check == "Yes")
+                                            show_option(userid, user_type);
+                                        else 
+                                            exit();
                                         return;
                                     } else {
                                         cout << "Reservation cancelled. Book remains unavailable." << endl;
-                                         
                                         string check;
-                            cout << "Do you want to back to menu option:(Yes/No)";
-                            cin >> check;
-                            if (check == "Yes" || check == "yes" || check == "YES") show_option(userid,user_type);
-                            else exit();
-                            return;
+                                        cout << "Do you want to go back to the menu option (Yes/No): ";
+                                        cin >> check;
+                                        if (check == "YES" || check == "yes" || check == "Yes")
+                                            show_option(userid, user_type);
+                                        else 
+                                            exit();
                                         return;
                                     }
-                                } else {
+                                }
+                                
+                                else {
                                     cout << "Sorry, the book is currently UNAVAILABLE" << endl;
                                 }
                                 break;
@@ -560,7 +585,7 @@ class user {
                             fileLines[targetLineIndex] = updatedLine;
                         }
                         {
-                            ofstream fout("C:\\Users\\mohit\\OneDrive\\Desktop\\LMS\\books.csv");
+                            ofstream fout(books);
                             if (!fout) {
                                 cout << "Error: Unable to write to books.csv" << endl;
                                  
@@ -582,7 +607,7 @@ class user {
                         string due_date = addDays(current_date, 15);
                         string return_date = "";  // blank for now
                         string fine = "0";
-                        ofstream foutBorrowed("C:\\Users\\mohit\\OneDrive\\Desktop\\LMS\\borrowedbook.csv", ios::app);
+                        ofstream foutBorrowed(borrowedbook, ios::app);
                         if (!foutBorrowed) {
                             cout << "Error: Unable to open borrowedbook.csv" << endl;
                              
@@ -608,14 +633,16 @@ class user {
                             return;
                         return;
                     }
+                    
                     void returnBook(string userid) {
                         system("cls");
                         string bookISBN;
                         cout << "Enter the ISBN of the book you are returning: ";
                         cin >> bookISBN;
                         
+                        // --- Step 1: Update borrowedbook.csv ---
                         vector<string> records;
-                        ifstream fin("C:\\Users\\mohit\\OneDrive\\Desktop\\LMS\\borrowedbook.csv");
+                        ifstream fin(borrowedbook);
                         if (!fin) {
                             cout << "Error: Unable to open borrowedbook.csv" << endl;
                             system("pause");
@@ -623,7 +650,7 @@ class user {
                         }
                         string line;
                         while(getline(fin, line)) {
-                            if(!line.empty())
+                            if (!line.empty())
                                 records.push_back(line);
                         }
                         fin.close();
@@ -662,24 +689,21 @@ class user {
                         if (!recordFound) {
                             cout << "No active borrow record found for ISBN " << bookISBN 
                                  << " for user " << userid << "." << endl;
-
-                                 string check;
-                                 cout << "Do you want to back to menu option:(Yes/No)";
-                                 cin >> check;
-                                 if (check == "Yes" || check == "yes" || check == "YES") show_option(userid,user_type);
-                                 else exit();
-                                 return;
-                            
-                            
+                            string check;
+                            cout << "Do you want to go back to the menu option (Yes/No): ";
+                            cin >> check;
+                            if (check == "Yes" || check == "yes" || check == "YES")
+                                show_option(userid, user_type);
+                            else 
+                                exit();
                             return;
                         }
                         
                         // Write the updated borrow records back to borrowedbook.csv.
-                        ofstream fout("C:\\Users\\mohit\\OneDrive\\Desktop\\LMS\\borrowedbook.csv");
+                        ofstream fout(borrowedbook);
                         if (!fout) {
                             cout << "Error: Unable to write to borrowedbook.csv" << endl;
                             system("pause");
-
                             return;
                         }
                         for (const auto &rec : records) {
@@ -687,20 +711,22 @@ class user {
                         }
                         fout.close();
                         
+                        // --- Step 2: Update the book's status in books.csv ---
                         vector<string> bookLines;
-                        ifstream finBooks("C:\\Users\\mohit\\OneDrive\\Desktop\\LMS\\books.csv");
+                        ifstream finBooks(books);
                         if (!finBooks) {
                             cout << "Error: Unable to open books.csv" << endl;
                             system("pause");
                             return;
                         }
                         while (getline(finBooks, line)) {
-                            if(!line.empty())
+                            if (!line.empty())
                                 bookLines.push_back(line);
                         }
                         finBooks.close();
                         
                         bool bookFound = false;
+                        bool reservedFlag = false; // will be true if book's status is "Reserved"
                         for (size_t i = 0; i < bookLines.size(); i++) {
                             stringstream bs(bookLines[i]);
                             string title, author, publisher, yearStr, ISBNStr, statusStr;
@@ -713,7 +739,16 @@ class user {
                             
                             if (ISBNStr == bookISBN) {
                                 bookFound = true;
-                                statusStr = "Available";  // Mark the book as available.
+                                // If status is "Unavailable", change to "Available".
+                                // If status is "Reserved", set reservedFlag so we process the reserved record.
+                                if (statusStr == "Unavailable") {
+                                    statusStr = "Available";
+                                } else if (statusStr == "Reserved") {
+                                    reservedFlag = true;
+                                    // For a reserved book, we want to update the reserved borrow record below,
+                                    // and then mark the book as "Unavailable" (since it is now being issued to the reserved user).
+                                    statusStr = "Unavailable";
+                                }
                                 ostringstream bos;
                                 bos << title << "," << author << "," << publisher << "," 
                                     << yearStr << "," << ISBNStr << "," << statusStr;
@@ -725,7 +760,7 @@ class user {
                         if (!bookFound) {
                             cout << "Book with ISBN " << bookISBN << " not found in books.csv." << endl;
                         } else {
-                            ofstream foutBooks("C:\\Users\\mohit\\OneDrive\\Desktop\\LMS\\books.csv");
+                            ofstream foutBooks(books);
                             if (!foutBooks) {
                                 cout << "Error: Unable to write to books.csv" << endl;
                                 system("pause");
@@ -737,6 +772,59 @@ class user {
                             foutBooks.close();
                         }
                         
+                        // --- Step 3: If the book was reserved, activate the reservation ---
+                        // That is, if reservedFlag is true, then search borrowedbook.csv for a record 
+                        // with the same ISBN and due date "2525-01-01" (i.e. a reserved record).
+                        // If found, update that record: borrowed date = current_date, due date = current_date + 15 days, return date remains empty, fine 0.
+                        if (reservedFlag) {
+                            vector<string> reservedRecords;
+                            ifstream finReserved(borrowedbook);
+                            if (!finReserved) {
+                                cout << "Error: Unable to open borrowedbook.csv for reserved record processing." << endl;
+                                system("pause");
+                                return;
+                            }
+                            while(getline(finReserved, line)) {
+                                if(!line.empty())
+                                    reservedRecords.push_back(line);
+                            }
+                            finReserved.close();
+                            
+                            bool reservedRecordFound = false;
+                            for (size_t i = 0; i < reservedRecords.size(); i++) {
+                                stringstream rs(reservedRecords[i]);
+                                string rUser, rISBN, rBorrowDate, rDueDate, rReturnDate, rFine;
+                                getline(rs, rUser, ',');
+                                getline(rs, rISBN, ',');
+                                getline(rs, rBorrowDate, ',');
+                                getline(rs, rDueDate, ',');
+                                getline(rs, rReturnDate, ',');
+                                getline(rs, rFine, ',');
+                                // Look for a reserved record with fixed due date "2525-01-01"
+                                if (rISBN == bookISBN && rDueDate == "2525-01-01") {
+                                    ostringstream rsoss;
+                                    rsoss << rUser << "," << rISBN << "," << current_date << "," 
+                                          << addDays(current_date, 15) << ",," << 0;
+                                    reservedRecords[i] = rsoss.str();
+                                    reservedRecordFound = true;
+                                    break;
+                                }
+                            }
+                            if (reservedRecordFound) {
+                                ofstream foutReserved(borrowedbook);
+                                if (!foutReserved) {
+                                    cout << "Error: Unable to write reserved records to borrowedbook.csv" << endl;
+                                    system("pause");
+                                    return;
+                                }
+                                for (const auto &r : reservedRecords) {
+                                    foutReserved << r << "\n";
+                                }
+                                foutReserved.close();
+                            }
+                        }
+                        
+                        // --- Step 4: Update the user's overall fine in users.csv ---
                         updateUserFine(userid, computedFine);
                         
                         cout << "Book returned successfully!" << endl;
@@ -746,12 +834,14 @@ class user {
                             cout << "No fine incurred." << endl;
                         }
                         string check;
-                            cout << "Do you want to back to menu option:(Yes/No)";
-                            cin >> check;
-                            if (check == "Yes" || check == "yes" || check == "YES") show_option(userid,user_type);
-                            else exit();
-                            return;
-                    }                 
+                        cout << "Do you want to go back to menu option (Yes/No): ";
+                        cin >> check;
+                        if (check == "Yes" || check == "yes" || check == "YES")
+                            show_option(userid, user_type);
+                        else 
+                            exit();
+                    }              
+                    
                     void viewBorrowedBookAndFine(string userid) {
                         system("cls");
                     
@@ -767,21 +857,34 @@ class user {
                             else exit();
                             return;
                     }
+                    
                     void payFine() {
                         system("cls");
                         string inputUser;
+                        cout <<"See the View Fine in the menu option to see the Fine"<<endl;
+                        cout <<"To go back type BACK(all caps)"<<endl;
                         cout << "Enter your User ID to confirm fine payment: ";
                         cin >> inputUser;
                         
                         // Check if the entered ID matches the current user's ID.
-                        while(inputUser != userid) {
+                        if(inputUser == "BACK"){
+                            show_option(userid,user_type);
+                        }
+                        else{
+                            int tried =1;
+                        while(inputUser != userid &&  tried <3) {
                             cout << "User ID mismatch! Payment cancelled." << endl;
                             cout << "Enter your User ID again to confirm fine payment: ";
                             cin >> inputUser;
+                            tried++;
                         }
-                        
+                        if (tried == 3){
+                            cout << "Due to exessive wrong input the program is terminated"<<endl;
+                            system("exit");
+                        }
+                        else {
                         vector<string> lines;
-                        ifstream fin("C:\\Users\\mohit\\OneDrive\\Desktop\\LMS\\users.csv");
+                        ifstream fin(users);
                         if (!fin) {
                             cout << "Error: Unable to open users.csv" << endl;
                              
@@ -830,7 +933,7 @@ class user {
                         }
                         
                         // Write the updated records back to users.csv
-                        ofstream fout("C:\\Users\\mohit\\OneDrive\\Desktop\\LMS\\users.csv");
+                        ofstream fout(users);
                         if (!fout) {
                             cout << "Error: Unable to write to users.csv" << endl;
                              
@@ -855,7 +958,10 @@ class user {
                             if (check == "Yes" || check == "yes" || check == "YES") show_option(userid,user_type);
                             else exit();
                             return;
+                            }
+                        }
                     }
+                    
                     void exit(){
                         cout << "Exiting the system..." << endl;
                         system("Exit");
@@ -908,7 +1014,7 @@ class user {
                         bool overdue = findoverdue(userid);
                         if (overdue) {
                             cout << "You have a book which is in overdue preiod. "  
-                                << ". Please Return the book before borrowing a new book." << endl;
+                                << ". Please Return the book before borrowing a another book." << endl;
                              
                             string check;
                             cout << "Do you want to back to menu option:(Yes/No)";
@@ -920,7 +1026,7 @@ class user {
                         }
                         // Check active borrowed count from borrowedbook.csv.
                         int activeBorrows = 0;
-                        ifstream finBorrowed("C:\\Users\\mohit\\OneDrive\\Desktop\\LMS\\borrowedbook.csv");
+                        ifstream finBorrowed(borrowedbook);
                         if (finBorrowed) {
                             string line;
                             while (getline(finBorrowed, line)) {
@@ -954,7 +1060,7 @@ class user {
                         cout << "Enter the ISBN of the book you want to borrow: ";
                         cin >> bookISBN;
 // Check if book is available.
-                        ifstream fin("C:\\Users\\mohit\\OneDrive\\Desktop\\LMS\\books.csv");
+                        ifstream fin(books);
                         if (!fin) {
                             cout << "Error: Unable to open books.csv" << endl;
                              
@@ -994,23 +1100,25 @@ class user {
                                 } else if (statusStr == "Unavailable") {
                                     string reserve;
                                     cout << "Sorry, the book is currently UNAVAILABLE.\n"
-                                        << "But you can reserve it. Do you want to reserve the book? (Yes/No): ";
+                                         << "But you can reserve it. Do you want to reserve the book? (Yes/No): ";
                                     cin >> reserve;
-                                    //update 
+                                    
                                     if (reserve == "YES" || reserve == "yes" || reserve == "Yes") {
+                                        // Update the book's status to "Reserved" in books.csv.
                                         string updatedLine = title + "," + author + "," + publisher + "," +
-                                                            yearStr + "," + ISBNStr + ",Reserved";
+                                                             yearStr + "," + ISBNStr + ",Reserved";
                                         fileLines[i] = updatedLine;
-                                        ofstream fout("C:\\Users\\mohit\\OneDrive\\Desktop\\LMS\\books.csv");
+                                        
+                                        ofstream fout(books);
                                         if (!fout) {
                                             cout << "Error: Unable to write to books.csv" << endl;
-                                             
                                             string check;
-                            cout << "Do you want to back to menu option:(Yes/No)";
-                            cin >> check;
-                            if (check == "Yes" || check == "yes" || check == "YES") show_option(userid,user_type);
-                            else exit();
-                            return;
+                                            cout << "Do you want to go back to the menu option (Yes/No): ";
+                                            cin >> check;
+                                            if (check == "YES" || check == "yes" || check == "Yes")
+                                                show_option(userid, user_type);
+                                            else 
+                                                exit();
                                             return;
                                         }
                                         for (const auto &l : fileLines) {
@@ -1018,23 +1126,40 @@ class user {
                                         }
                                         fout.close();
                                         cout << "Book reserved successfully!" << endl;
-                                         
+                                        
+                                        // Append a new record in borrowedbooks.csv with the desired format:
+                                        // userid,ISBN,current_date,2525-01-01,,0
+                                        string current_date = currentDate();
+                                        ostringstream oss;
+                                        oss << userid << "," << bookISBN << "," << current_date << ",2525-01-01,," << 0;
+                                        string borrowedLine = oss.str();
+                                        
+                                        ofstream borrowedOut(borrowedbook, ios::app);
+                                        if (!borrowedOut) {
+                                            cout << "Error: Unable to open borrowedbooks.csv" << endl;
+                                        } else {
+                                            borrowedOut << borrowedLine << "\n";
+                                            borrowedOut.close();
+                                            // cout << "Borrowed book record added with due date 2525-01-01." << endl;
+                                        }
+                                        
                                         string check;
-                            cout << "Do you want to back to menu option:(Yes/No)";
-                            cin >> check;
-                            if (check == "Yes" || check == "yes" || check == "YES") show_option(userid,user_type);
-                            else exit();
-                            return;
+                                        cout << "Do you want to go back to the menu option (Yes/No): ";
+                                        cin >> check;
+                                        if (check == "YES" || check == "yes" || check == "Yes")
+                                            show_option(userid, user_type);
+                                        else 
+                                            exit();
                                         return;
                                     } else {
                                         cout << "Reservation cancelled. Book remains unavailable." << endl;
-                                         
                                         string check;
-                            cout << "Do you want to back to menu option:(Yes/No)";
-                            cin >> check;
-                            if (check == "Yes" || check == "yes" || check == "YES") show_option(userid,user_type);
-                            else exit();
-                            return;
+                                        cout << "Do you want to go back to the menu option (Yes/No): ";
+                                        cin >> check;
+                                        if (check == "YES" || check == "yes" || check == "Yes")
+                                            show_option(userid, user_type);
+                                        else 
+                                            exit();
                                         return;
                                     }
                                 } else {
@@ -1069,7 +1194,7 @@ class user {
                             fileLines[targetLineIndex] = updatedLine;
                         }
                         {
-                            ofstream fout("C:\\Users\\mohit\\OneDrive\\Desktop\\LMS\\books.csv");
+                            ofstream fout(books);
                             if (!fout) {
                                 cout << "Error: Unable to write to books.csv" << endl;
                                  
@@ -1091,7 +1216,7 @@ class user {
                         string due_date = addDays(current_date, 15);
                         string return_date = "";  
                         string fine = "0";
-                        ofstream foutBorrowed("C:\\Users\\mohit\\OneDrive\\Desktop\\LMS\\borrowedbook.csv", ios::app);
+                        ofstream foutBorrowed(borrowedbook, ios::app);
                         if (!foutBorrowed) {
                             cout << "Error: Unable to open borrowedbook.csv" << endl;
                              
@@ -1122,33 +1247,31 @@ class user {
                             else exit();
                             return;
                     }
+                    
                     void returnBook(string userid) {
+                        int overdueDays ;
                         system("cls");
                         string bookISBN;
                         cout << "Enter the ISBN of the book you are returning: ";
                         cin >> bookISBN;
                         
-                        // === Step 1: Update borrowedbook.csv ===
+                        // --- Step 1: Update borrowedbook.csv ---
                         vector<string> records;
-                        ifstream fin("C:\\Users\\mohit\\OneDrive\\Desktop\\LMS\\borrowedbook.csv");
+                        ifstream fin(borrowedbook);
                         if (!fin) {
                             cout << "Error: Unable to open borrowedbook.csv" << endl;
-                            string check2;
-                            cout << "Do you want to back to menu option:(Yes/No)";
-                            cin >> check2;
-                            if (check2 == "Yes" || check2 == "yes" || check2 == "YES") show_option(userid,user_type);
-                            else exit();
+                            system("pause");
                             return;
                         }
                         string line;
                         while(getline(fin, line)) {
-                            if(!line.empty())
+                            if (!line.empty())
                                 records.push_back(line);
                         }
                         fin.close();
                         
                         bool recordFound = false;
-                        int overdueDays = 0;
+                        // int computedFine = 0;
                         string current_date = currentDate();  // e.g., "YYYY-MM-DD"
                         
                         // Find the active borrow record for this user and book.
@@ -1165,7 +1288,10 @@ class user {
                             if (recordUser == userid && r_bookISBN == bookISBN && returnDate == "") {
                                 recordFound = true;
                                 // Calculate overdue days (if any) based on due date.
-                                int overdueDays = daysBetween(dueDate, current_date);
+                                 overdueDays = daysBetween(dueDate, current_date);
+                                if (overdueDays > 0) {
+                                    // computedFine = overdueDays * 10;  // Fine: ₹10 per day overdue.
+                                }
                                 // Update the record with the current date and computed fine.
                                 ostringstream oss;
                                 oss << recordUser << "," << r_bookISBN << "," << borrowDate << "," 
@@ -1178,23 +1304,21 @@ class user {
                         if (!recordFound) {
                             cout << "No active borrow record found for ISBN " << bookISBN 
                                  << " for user " << userid << "." << endl;
-                                 string check2;
-                                 cout << "Do you want to back to menu option:(Yes/No)";
-                                 cin >> check2;
-                                 if (check2 == "Yes" || check2 == "yes" || check2 == "YES") show_option(userid,user_type);
-                                 else exit();
-                                 return;
+                            string check;
+                            cout << "Do you want to go back to the menu option (Yes/No): ";
+                            cin >> check;
+                            if (check == "Yes" || check == "yes" || check == "YES")
+                                show_option(userid, user_type);
+                            else 
+                                exit();
+                            return;
                         }
                         
                         // Write the updated borrow records back to borrowedbook.csv.
-                        ofstream fout("C:\\Users\\mohit\\OneDrive\\Desktop\\LMS\\borrowedbook.csv");
+                        ofstream fout(borrowedbook);
                         if (!fout) {
                             cout << "Error: Unable to write to borrowedbook.csv" << endl;
-                            string check2;
-                            cout << "Do you want to back to menu option:(Yes/No)";
-                            cin >> check2;
-                            if (check2 == "Yes" || check2 == "yes" || check2 == "YES") show_option(userid,user_type);
-                            else exit();
+                            system("pause");
                             return;
                         }
                         for (const auto &rec : records) {
@@ -1202,25 +1326,22 @@ class user {
                         }
                         fout.close();
                         
-                        // === Step 2: Update the book's status in books.csv to "Available" ===
+                        // --- Step 2: Update the book's status in books.csv ---
                         vector<string> bookLines;
-                        ifstream finBooks("C:\\Users\\mohit\\OneDrive\\Desktop\\LMS\\books.csv");
+                        ifstream finBooks(books);
                         if (!finBooks) {
                             cout << "Error: Unable to open books.csv" << endl;
-                            string check2;
-                            cout << "Do you want to back to menu option:(Yes/No)";
-                            cin >> check2;
-                            if (check2 == "Yes" || check2 == "yes" || check2 == "YES") show_option(userid,user_type);
-                            else exit();
+                            system("pause");
                             return;
                         }
                         while (getline(finBooks, line)) {
-                            if(!line.empty())
+                            if (!line.empty())
                                 bookLines.push_back(line);
                         }
                         finBooks.close();
                         
                         bool bookFound = false;
+                        bool reservedFlag = false; // will be true if book's status is "Reserved"
                         for (size_t i = 0; i < bookLines.size(); i++) {
                             stringstream bs(bookLines[i]);
                             string title, author, publisher, yearStr, ISBNStr, statusStr;
@@ -1233,7 +1354,16 @@ class user {
                             
                             if (ISBNStr == bookISBN) {
                                 bookFound = true;
-                                statusStr = "Available";  // Mark the book as available.
+                                // If status is "Unavailable", change to "Available".
+                                // If status is "Reserved", set reservedFlag so we process the reserved record.
+                                if (statusStr == "Unavailable") {
+                                    statusStr = "Available";
+                                } else if (statusStr == "Reserved") {
+                                    reservedFlag = true;
+                                    // For a reserved book, we want to update the reserved borrow record below,
+                                    // and then mark the book as "Unavailable" (since it is now being issued to the reserved user).
+                                    statusStr = "Unavailable";
+                                }
                                 ostringstream bos;
                                 bos << title << "," << author << "," << publisher << "," 
                                     << yearStr << "," << ISBNStr << "," << statusStr;
@@ -1245,14 +1375,10 @@ class user {
                         if (!bookFound) {
                             cout << "Book with ISBN " << bookISBN << " not found in books.csv." << endl;
                         } else {
-                            ofstream foutBooks("C:\\Users\\mohit\\OneDrive\\Desktop\\LMS\\books.csv");
+                            ofstream foutBooks(books);
                             if (!foutBooks) {
                                 cout << "Error: Unable to write to books.csv" << endl;
-                                string check2;
-                                cout << "Do you want to back to menu option:(Yes/No)";
-                                cin >> check2;
-                                if (check2 == "Yes" || check2 == "yes" || check2 == "YES") show_option(userid,user_type);
-                                else exit();
+                                system("pause");
                                 return;
                             }
                             for (const auto &l : bookLines) {
@@ -1261,20 +1387,76 @@ class user {
                             foutBooks.close();
                         }
                         
-                        updateUserFine(userid, overdueDays);
+                        // --- Step 3: If the book was reserved, activate the reservation ---
+                        // That is, if reservedFlag is true, then search borrowedbook.csv for a record 
+                        // with the same ISBN and due date "2525-01-01" (i.e. a reserved record).
+                        // If found, update that record: borrowed date = current_date, due date = current_date + 15 days, return date remains empty, fine 0.
+                        if (reservedFlag) {
+                            vector<string> reservedRecords;
+                            ifstream finReserved(borrowedbook);
+                            if (!finReserved) {
+                                cout << "Error: Unable to open borrowedbook.csv for reserved record processing." << endl;
+                                system("pause");
+                                return;
+                            }
+                            while(getline(finReserved, line)) {
+                                if(!line.empty())
+                                    reservedRecords.push_back(line);
+                            }
+                            finReserved.close();
+                            
+                            bool reservedRecordFound = false;
+                            for (size_t i = 0; i < reservedRecords.size(); i++) {
+                                stringstream rs(reservedRecords[i]);
+                                string rUser, rISBN, rBorrowDate, rDueDate, rReturnDate, rFine;
+                                getline(rs, rUser, ',');
+                                getline(rs, rISBN, ',');
+                                getline(rs, rBorrowDate, ',');
+                                getline(rs, rDueDate, ',');
+                                getline(rs, rReturnDate, ',');
+                                getline(rs, rFine, ',');
+                                // Look for a reserved record with fixed due date "2525-01-01"
+                                if (rISBN == bookISBN && rDueDate == "2525-01-01") {
+                                    ostringstream rsoss;
+                                    rsoss << rUser << "," << rISBN << "," << current_date << "," 
+                                          << addDays(current_date, 15) << ",," << 0;
+                                    reservedRecords[i] = rsoss.str();
+                                    reservedRecordFound = true;
+                                    break;
+                                }
+                            }
+                            if (reservedRecordFound) {
+                                ofstream foutReserved(borrowedbook);
+                                if (!foutReserved) {
+                                    cout << "Error: Unable to write reserved records to borrowedbook.csv" << endl;
+                                    system("pause");
+                                    return;
+                                }
+                                for (const auto &r : reservedRecords) {
+                                    foutReserved << r << "\n";
+                                }
+                                foutReserved.close();
+                            }
+                        }
+                        
+                        // --- Step 4: Update the user's overall fine in users.csv ---
+                        updateUserFine(userid, overdueDays );
                         
                         cout << "Book returned successfully!" << endl;
-                        if (overdueDays> 0) {
-                            cout << "You have a book for  " << overdueDays << " in overdue." << endl;
-                        } 
-                        string check2;
-                            cout << "Do you want to back to menu option:(Yes/No)";
-                            cin >> check2;
-                            if (check2 == "Yes" || check2 == "yes" || check2 == "YES") show_option(userid,user_type);
-                            else exit();
-                            return;
-
-                    }                 
+                        if (overdueDays  > 0) {
+                            cout << "You have incurred a fine of Rs. " << overdueDays  << "." << endl;
+                        } else {
+                            cout << "No fine incurred." << endl;
+                        }
+                        string check;
+                        cout << "Do you want to go back to menu option (Yes/No): ";
+                        cin >> check;
+                        if (check == "Yes" || check == "yes" || check == "YES")
+                            show_option(userid, user_type);
+                        else 
+                            exit();
+                    }   
+                    
                     void viewBorrowedBookAndFine(string userid) {
                         system("cls");
                         see_borrowed_book(userid);  
@@ -1285,6 +1467,7 @@ class user {
                             else exit();
                             return; 
                     }                   
+                    
                     void exit(){
                         cout << "Exiting the System ..."
                         << endl;
@@ -1346,7 +1529,7 @@ class user {
                             return;
                         }
                         
-                        ofstream fout("C:\\Users\\mohit\\OneDrive\\Desktop\\LMS\\users.csv", ios::app);
+                        ofstream fout(users, ios::app);
                         if (!fout) {
                             cout << "Error: Unable to open users.csv" << endl;
                             return;
@@ -1362,6 +1545,7 @@ class user {
                             else exit();
                             return;
                     }
+                    
                     void removeUser(){
 
                         cout << "Type the details of the user you want to remove" << endl;
@@ -1376,7 +1560,7 @@ class user {
                             cout << "YOU CAN NOT REMOVE A LIBRARIAN. LIBRARY CAN HAVE ONLY ONE LIBRARIAN AND THAT IS ME, YOU SILLY FELLOW." << endl;
                             return;
                         }
-                        ifstream fin("C:\\Users\\mohit\\OneDrive\\Desktop\\LMS\\users.csv");
+                        ifstream fin(users);
                         if (!fin) {
                             cout << "Error: Unable to open users.csv" << endl;
                             return;
@@ -1410,7 +1594,7 @@ class user {
                             return;
                         }
                         // Write the updated list back to users.csv
-                        ofstream fout("C:\\Users\\mohit\\OneDrive\\Desktop\\LMS\\users.csv");
+                        ofstream fout(users);
                         if (!fout) {
                             cout << "Error: Unable to open users.csv for writing." << endl;
                             return;
@@ -1428,6 +1612,7 @@ class user {
                             else exit();
                             return;
                     }
+                    
                     void addBook(){ 
                         cout<< "Type the ISBN number of the BOOK you want to add"<<endl;
                         string book_name,author,publisher,year,ISBN;
@@ -1443,7 +1628,7 @@ class user {
                         cin >> ISBN;
 
                         
-                        ofstream fout("C:\\Users\\mohit\\OneDrive\\Desktop\\LMS\\books.csv", ios::app);
+                        ofstream fout(books, ios::app);
                         if (!fout) {
                             cout << "Error: Unable to open books.csv" << endl;
                             return;
@@ -1459,13 +1644,14 @@ class user {
                             else exit();
                             return;
                     }   
+                    
                     void removeBook(){
                         cout << "Type the details of the BOOK you want to remove" << endl;
                         string ISBN;
                         cout << "ISBN of the book: ";
                         cin >> ISBN;
                         
-                        ifstream fin("C:\\Users\\mohit\\OneDrive\\Desktop\\LMS\\books.csv");
+                        ifstream fin(books);
                         if (!fin) {
                             cout << "Error: Unable to open books.csv" << endl;
                             return;
@@ -1490,6 +1676,7 @@ class user {
                             if(isbn == ISBN) {
                                 userFound = true;
                             } else {
+
                                 lines.push_back(line);
                             }
                         }
@@ -1500,7 +1687,7 @@ class user {
                             return;
                         }
                         // Write the updated list back to books.csv
-                        ofstream fout("C:\\Users\\mohit\\OneDrive\\Desktop\\LMS\\books.csv");
+                        ofstream fout(books);
                         if (!fout) {
                             cout << "Error: Unable to open books.csv for writing." << endl;
                             return;
@@ -1518,6 +1705,7 @@ class user {
                             else exit();
                             return;
                     } 
+                    
                     void exit(){
                         cout << "Exiting the System ..."<<endl;
                         system("exit");
@@ -1552,7 +1740,7 @@ class Account {
         // Pass the stored userid from the Account to the respective object.
         void showoption(usertype user_type, bool check) {
             if (!check) {
-                cout << "No user found";
+                cout << "No user found, exiting the program.\nBye Cutie Pie";
             } else {
                 if (user_type == Student) {
                     Students s;
@@ -1628,7 +1816,7 @@ pair<string,string> get_details(usertype user_type) {
 }
 
 bool auth(pair<string, string> user_login,usertype user_type) {
-    ifstream file("C:\\Users\\mohit\\OneDrive\\Desktop\\LMS\\users.csv");
+    ifstream file(users);
 
 
     if (!file) {
@@ -1667,8 +1855,15 @@ bool auth(pair<string, string> user_login,usertype user_type) {
             return true;  
         }
     }
-    cout << "Sorry , UserId or password are incorrect"<<endl;
-    return false;  
+    cout << "Sorry , UserId or password are incorrect\nType your password and userid again(RMEMBER YOU CAN TRY ONLY THREE TIME)."<<endl;
+    system("pause"); 
+    system("clear");
+    get_details( user_type);
+    cout << "Sorry , UserId or password are incorrect\nType your password and userid again(RMEMBER YOU CAN TRY ONLY THREE TIME)."<<endl;
+    system("pause");
+    system("clear");
+    get_details( user_type);
+    return false;
 }
 
 int main() {
