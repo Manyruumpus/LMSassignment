@@ -1,0 +1,39 @@
+User Manual for the LMS System
+
+Although the system is quite user-friendly, this manual is provided in case you encounter any problems while exploring the LMS.
+
+Login Process:
+
+Select User Class:
+Use the up and down arrow keys to choose the user class you belong to.
+
+Enter Credentials:
+Type your user ID and password. You have only three tries; after three incorrect attempts, the program will terminate.
+
+Access Options:
+Once you enter the correct credentials, an option menu tailored to your user class will appear. Use the arrow keys to navigate and select an option.
+
+For Students and Faculty:
+
+Borrow Book:
+
+You can borrow a book if it is available.
+If the book is unavailable, you can reserve it. Once the current user returns the book, it will automatically be assigned to your user ID.
+If the book is already reserved, you will have to wait until it is returned.
+Return Book:
+
+To return a book, enter the ISBN.
+A fine will be calculated based on the due date and the return date. The fine amount will be displayed and stored in your account.
+View Books and Fines:
+
+This option allows you to see the list of books and any fines on your account.
+Pay Fine:
+
+You cannot see your fine amount in this option; you must view it in the previous option.
+To pay the fine, you must type your user ID. You have only three tries; otherwise, you will be returned to the previous menu.
+Exit:
+
+Terminate the program.
+For Librarians:
+
+The code is self-explanatory for librarians.
