@@ -74,6 +74,50 @@ int dateDifference(int year1, int month1, int day1, int year2, int month2, int d
     return abs(difference); // Return absolute difference in days
 }
 
+bool auth(pair<string, string> user_login,usertype user_type) {
+    ifstream file(users);
+
+
+    if (!file) {
+        cout << "Error: Unable to open users.csv. File may not exist!" << endl;
+        return false;
+    }
+
+    string line;  
+    string stored_userid, stored_password;
+    string stored_user_type;
+    string fine;
+
+    string user_type_st;
+
+    switch (user_type){
+        case 0:
+        user_type_st = "Student" ;
+        break;
+        case 1:
+        user_type_st = "Faculty" ;
+        break;
+        case 2:
+        user_type_st = "Librarian" ;
+        break;
+    }
+
+    while (getline(file, line)) {  
+        stringstream ss(line);
+        getline(ss, stored_userid, ',');
+        getline(ss, stored_password, ',');
+        getline(ss, stored_user_type, ',');
+        getline(ss, fine);
+
+
+        if (user_login.first == stored_userid && user_login.second == stored_password && user_type_st == stored_user_type && stoi(fine)>=0 ) {
+            return true;  
+        }
+    }
+    cout << "Sorry , UserId or password are incorrect\nThe program will be terminate"<<endl;
+    return false;
+}
+
 class user {
     public:
         usertype user_type;
@@ -391,7 +435,7 @@ class user {
                     
                     void borrowBook(string userid) {
                         system("cls");
-                        // Check if user has outstanding fines.
+                        // Check if user has fines.
                         int userFine = see_user_fine(userid);
                         if (userFine < 0) {
                             cout << "User record not found." << endl;
@@ -528,7 +572,7 @@ class user {
                                         } else {
                                             borrowedOut << borrowedLine << "\n";
                                             borrowedOut.close();
-                                            cout << "Borrowed book record added with due date 2525-01-01." << endl;
+                                            cout << "This book is Reserve on your userid." << endl;
                                         }
                                         
                                         string check;
@@ -552,11 +596,18 @@ class user {
                                     }
                                 }
                                 
-                                else {
+                                else if(statusStr== "Reserved"){
                                     cout << "Sorry, the book is currently UNAVAILABLE" << endl;
+
+                                    string check;
+                                    cout << "Do you want to back to menu option:(Yes/No)";
+                                    cin >> check;
+                                    if (check == "Yes" || check == "yes" || check == "YES") show_option(userid,user_type);
+                                    else exit();
+                                    return;
                                 }
                                 break;
-                            }
+                            } 
                         }
                         if (!found) {
                             cout <<"error"<<endl;
@@ -567,7 +618,6 @@ class user {
                             cin >> check;
                             if (check == "Yes" || check == "yes" || check == "YES") show_option(userid,user_type);
                             else exit();
-                            return;
                             return;
                         }
                         
@@ -605,7 +655,7 @@ class user {
                         // Record the borrowing transaction in borrowedbook.csv.
                         string current_date = currentDate();
                         string due_date = addDays(current_date, 15);
-                        string return_date = "";  // blank for now
+                        string return_date = "";  
                         string fine = "0";
                         ofstream foutBorrowed(borrowedbook, ios::app);
                         if (!foutBorrowed) {
@@ -640,7 +690,6 @@ class user {
                         cout << "Enter the ISBN of the book you are returning: ";
                         cin >> bookISBN;
                         
-                        // --- Step 1: Update borrowedbook.csv ---
                         vector<string> records;
                         ifstream fin(borrowedbook);
                         if (!fin) {
@@ -657,7 +706,7 @@ class user {
                         
                         bool recordFound = false;
                         int computedFine = 0;
-                        string current_date = currentDate();  // e.g., "YYYY-MM-DD"
+                        string current_date = currentDate(); 
                         
                         // Find the active borrow record for this user and book.
                         for (size_t i = 0; i < records.size(); i++) {
@@ -711,7 +760,6 @@ class user {
                         }
                         fout.close();
                         
-                        // --- Step 2: Update the book's status in books.csv ---
                         vector<string> bookLines;
                         ifstream finBooks(books);
                         if (!finBooks) {
@@ -746,7 +794,7 @@ class user {
                                 } else if (statusStr == "Reserved") {
                                     reservedFlag = true;
                                     // For a reserved book, we want to update the reserved borrow record below,
-                                    // and then mark the book as "Unavailable" (since it is now being issued to the reserved user).
+                                    // and then mark the book as "Unavailable" 
                                     statusStr = "Unavailable";
                                 }
                                 ostringstream bos;
@@ -771,9 +819,7 @@ class user {
                             }
                             foutBooks.close();
                         }
-                        
-                        // --- Step 3: If the book was reserved, activate the reservation ---
-                        // That is, if reservedFlag is true, then search borrowedbook.csv for a record 
+                 
                         // with the same ISBN and due date "2525-01-01" (i.e. a reserved record).
                         // If found, update that record: borrowed date = current_date, due date = current_date + 15 days, return date remains empty, fine 0.
                         if (reservedFlag) {
@@ -824,7 +870,6 @@ class user {
                             }
                         }
                         
-                        // --- Step 4: Update the user's overall fine in users.csv ---
                         updateUserFine(userid, computedFine);
                         
                         cout << "Book returned successfully!" << endl;
@@ -1140,7 +1185,6 @@ class user {
                                         } else {
                                             borrowedOut << borrowedLine << "\n";
                                             borrowedOut.close();
-                                            // cout << "Borrowed book record added with due date 2525-01-01." << endl;
                                         }
                                         
                                         string check;
@@ -1164,6 +1208,13 @@ class user {
                                     }
                                 } else {
                                     cout << "Sorry, the book is currently UNAVAILABLE" << endl;
+                                    string check;
+                                    cout << "Do you want to back to menu option:(Yes/No)";
+                                    cin >> check;
+                                    if (check == "Yes" || check == "yes" || check == "YES") show_option(userid,user_type);
+                                    else exit();
+                                    return;
+                                    
                                 }
                                 break;
                             }
@@ -1272,7 +1323,7 @@ class user {
                         
                         bool recordFound = false;
                         // int computedFine = 0;
-                        string current_date = currentDate();  // e.g., "YYYY-MM-DD"
+                        string current_date = currentDate();  
                         
                         // Find the active borrow record for this user and book.
                         for (size_t i = 0; i < records.size(); i++) {
@@ -1287,12 +1338,9 @@ class user {
                             
                             if (recordUser == userid && r_bookISBN == bookISBN && returnDate == "") {
                                 recordFound = true;
-                                // Calculate overdue days (if any) based on due date.
                                  overdueDays = daysBetween(dueDate, current_date);
                                 if (overdueDays > 0) {
-                                    // computedFine = overdueDays * 10;  // Fine: ₹10 per day overdue.
                                 }
-                                // Update the record with the current date and computed fine.
                                 ostringstream oss;
                                 oss << recordUser << "," << r_bookISBN << "," << borrowDate << "," 
                                     << dueDate << "," << current_date << "," << overdueDays;
@@ -1326,7 +1374,6 @@ class user {
                         }
                         fout.close();
                         
-                        // --- Step 2: Update the book's status in books.csv ---
                         vector<string> bookLines;
                         ifstream finBooks(books);
                         if (!finBooks) {
@@ -1387,7 +1434,6 @@ class user {
                             foutBooks.close();
                         }
                         
-                        // --- Step 3: If the book was reserved, activate the reservation ---
                         // That is, if reservedFlag is true, then search borrowedbook.csv for a record 
                         // with the same ISBN and due date "2525-01-01" (i.e. a reserved record).
                         // If found, update that record: borrowed date = current_date, due date = current_date + 15 days, return date remains empty, fine 0.
@@ -1439,7 +1485,6 @@ class user {
                             }
                         }
                         
-                        // --- Step 4: Update the user's overall fine in users.csv ---
                         updateUserFine(userid, overdueDays );
                         
                         cout << "Book returned successfully!" << endl;
@@ -1534,9 +1579,34 @@ class user {
                             cout << "Error: Unable to open users.csv" << endl;
                             return;
                         }
+                        usertype user_type;
+                        if(user_type_int == "Student"){
+                            user_type = Student;
+                        }
+                        else if(user_type_int == "Faculty"){
+                            user_type = Faculty;
+                        }
+                        else if(user_type_int == "Librarian"){
+                            user_type = Librarian;
+                        }
+                        else {
+                            cout<<"The User Type you have typed is wrong"<<endl;
+                            string check;
+                            cout << "Do you want to back to menu option:(Yes/No)";
+                            cin >> check;
+                            if (check == "Yes" || check == "yes" || check == "YES") show_option(userid,user_type);
+                            else exit();
+                            return;
+                        }
+                        bool authcheck = auth(make_pair(userid,password),user_type);
+                        if(authcheck == false){
                         fout << userid << "," << password << "," << user_type_int << ",0" << "\n";
                         fout.close();
                         cout << "User " << userid << " added successfully." << endl;
+                        }
+                        else {
+                            cout << "The User with the this details Already Exist"<<endl;
+                        }
                         //  
                         string check;
                             cout << "Do you want to back to menu option:(Yes/No)";
@@ -1613,38 +1683,77 @@ class user {
                             return;
                     }
                     
-                    void addBook(){ 
-                        cout<< "Type the ISBN number of the BOOK you want to add"<<endl;
-                        string book_name,author,publisher,year,ISBN;
-                        cout << "Book Name: ";
-                        cin >> book_name;
-                        cout << "\nAuthor Name:";
-                        cin >> author;
-                        cout << "\nPusblisher Name:";
-                        cin >> publisher;
-                        cout << "\nEdition Year: ";
-                        cin >> year;
-                        cout << "\nISBN:";
-                        cin >> ISBN;
+                    void addBook() { 
+    cout << "Type the ISBN number of the BOOK you want to add" << endl;
+    string book_name, author, publisher, year, ISBN;
+    cout << "Book Name: ";
+    cin >> book_name;
+    cout << "\nAuthor Name: ";
+    cin >> author;
+    cout << "\nPublisher Name: ";
+    cin >> publisher;
+    cout << "\nEdition Year: ";
+    cin >> year;
+    cout << "\nISBN: ";
+    cin >> ISBN;
+    
+    // First, check if a book with the same ISBN already exists.
+    ifstream fin(books);
+    if (!fin) {
+        cout << "Error: Unable to open books.csv for reading." << endl;
+        return;
+    }
+    string line;
+    bool exists = false;
+    while (getline(fin, line)) {
+        if (line.empty()) continue;
+        stringstream ss(line);
+        string existingBookName, existingAuthor, existingPublisher, existingYear, existingISBN, existingStatus;
+        getline(ss, existingBookName, ',');
+        getline(ss, existingAuthor, ',');
+        getline(ss, existingPublisher, ',');
+        getline(ss, existingYear, ',');
+        getline(ss, existingISBN, ',');
+        getline(ss, existingStatus, ',');
+        if (existingISBN == ISBN) {
+            exists = true;
+            break;
+        }
+    }
+    fin.close();
+    
+    if (exists) {
+        cout << "A book with ISBN " << ISBN << " already exists in the system. Cannot add duplicate." << endl;
+        string check;
+        cout << "Do you want to go back to the menu option (Yes/No): ";
+        cin >> check;
+        if (check == "Yes" || check == "yes" || check == "YES")
+            show_option(userid, user_type);
+        else 
+            exit();
+        return;
+    }
+    
+    // If not exists, add the new book to books.csv.
+    ofstream fout(books, ios::app);
+    if (!fout) {
+        cout << "Error: Unable to open books.csv for writing." << endl;
+        return;
+    }
+    fout << book_name << "," << author << "," << publisher << "," << year << "," << ISBN << ",Available\n";
+    fout.close();
+    cout << "Book " << book_name << " added successfully." << endl;
+    
+    string check;
+    cout << "Do you want to go back to the menu option (Yes/No): ";
+    cin >> check;
+    if (check == "Yes" || check == "yes" || check == "YES")
+        show_option(userid, user_type);
+    else 
+        exit();
+    return;
+}
 
-                        
-                        ofstream fout(books, ios::app);
-                        if (!fout) {
-                            cout << "Error: Unable to open books.csv" << endl;
-                            return;
-                        }
-                        fout << book_name << "," << author << "," << publisher << "," <<year<<","<< ISBN <<",Available\n";
-                        fout.close();
-                        cout << "Book" << book_name << " added successfully." << endl;
-
-                        string check;
-                            cout << "Do you want to back to menu option:(Yes/No)";
-                            cin >> check;
-                            if (check == "Yes" || check == "yes" || check == "YES") show_option(userid,user_type);
-                            else exit();
-                            return;
-                    }   
-                    
                     void removeBook(){
                         cout << "Type the details of the BOOK you want to remove" << endl;
                         string ISBN;
@@ -1815,57 +1924,6 @@ pair<string,string> get_details(usertype user_type) {
     return make_pair(userid,password);
 }
 
-bool auth(pair<string, string> user_login,usertype user_type) {
-    ifstream file(users);
-
-
-    if (!file) {
-        cout << "Error: Unable to open users.csv. File may not exist!" << endl;
-        return false;
-    }
-
-    string line;  
-    string stored_userid, stored_password;
-    string stored_user_type;
-    string fine;
-
-    string user_type_st;
-
-    switch (user_type){
-        case 0:
-        user_type_st = "Student" ;
-        break;
-        case 1:
-        user_type_st = "Faculty" ;
-        break;
-        case 2:
-        user_type_st = "Librarian" ;
-        break;
-    }
-
-    while (getline(file, line)) {  
-        stringstream ss(line);
-        getline(ss, stored_userid, ',');
-        getline(ss, stored_password, ',');
-        getline(ss, stored_user_type, ',');
-        getline(ss, fine);
-
-
-        if (user_login.first == stored_userid && user_login.second == stored_password && user_type_st == stored_user_type && stoi(fine)>=0 ) {
-            return true;  
-        }
-    }
-    cout << "Sorry , UserId or password are incorrect\nType your password and userid again(RMEMBER YOU CAN TRY ONLY THREE TIME)."<<endl;
-    system("pause"); 
-    system("clear");
-    get_details( user_type);
-    cout << "Sorry , UserId or password are incorrect\nType your password and userid again(RMEMBER YOU CAN TRY ONLY THREE TIME)."<<endl;
-    system("pause");
-    system("clear");
-    get_details( user_type);
-    return false;
-}
-
 int main() {
     usertype user_type = knowuser_type();
     // Print the selected user type as a string
@@ -1880,3 +1938,4 @@ int main() {
 //then accordingly the code will run 
     return 0;
 }
+
